@@ -1,0 +1,84 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:5.5
+    container_name: docker_mysql
+    ports:
+    - 3306:3306
+    network_mode: host
+    environment:
+      MYSQL_ROOT_PASSWORD : root
+      MYSQL_PASSWORD: root
+      MYSQL_USER: root
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_HOST: localhost
+      
+  mongo:
+    image: mongo
+    container_name: docker_mongo
+    ports:
+    - 27017:27017
+    network_mode: host
+    environment:
+ #     MONGO_PASSWORD: ${MONGO_PASSWORD}
+  #    MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_DATABASE: Springdb
+          
+  NoteService:
+    build: ./NoteService
+    image: noteservice
+    restart: always
+    network_mode: host
+    depends_on:
+    - mongo
+    ports:
+    - 8082:8082
+    
+  CategoryService:
+    build: ./CategoryService
+    image: keepnote/category:initial
+    restart: always
+    network_mode: host
+    depends_on:
+    - mongo
+    ports:
+    - 8083:8083
+    
+  ReminderService:
+    build: ./ReminderService
+    image: keepnote/reminderservice:initial
+    restart: always
+    network_mode: host
+    depends_on:
+    - mongo
+    ports:
+    - 8081:8081
+    
+  UserService:
+    build: ./UserService
+    image: userservice
+    restart: always
+    network_mode: host
+    depends_on:
+    - mongo
+    ports:
+    - 8080:8080
+    
+  UserAuthService:
+    build: ./UserAuthentication-Service
+    image: authservice
+    restart: always
+    network_mode: host
+    depends_on:
+    - mysql
+    ports:
+    - 8089:8089
+   
+  angular:
+    image: angular_keepnote
+    network_mode: host
+    container_name: angular-docker
+    ports:
+      - 4200:4200
+    healthcheck:
+      test: "exit 0"
